@@ -1,0 +1,69 @@
+= Auditor
+
+Auditor is a Rails 3 plugin for auditing access to your ActiveRecord model objects. It allows you to declaratively specify what CRUD operations should be audited and store that audit data in the database. You can also specify what attributes of model objects should automatically be audited and which ones should be ignored.
+
+To audit your model objects you must specify which operations should be audited and which model attributes should be tracked. This "specify what you want to collect" approach avoids being overwhelmed with data and makes you carefully consider what is most important to audit.
+
+= Installation
+
+To use it with your Rails 3 project, add the following line to your Gemfile
+
+  gem 'auditor'
+  
+Auditor can also be installed as a Rails plugin
+  
+  rails plugin install git://github.com/nearinfinity/auditor.git
+
+Generate the migration and create the audits table
+
+  rails generate auditor:migration
+  rake db:migrate
+
+= Setup
+
+Auditor needs to know who the current user is, but with no standard for doing so you'll have to do a little work to set things up. You simply need to set your current user model object as the Auditor current user before any CRUD operations are performed. For example, in a Rails application you could add the following to your application_controller.rb
+
+  class ApplicationController < ActionController::Base
+    before_filter :set_current_user
+    
+    private
+    
+    def set_current_user
+      Auditor::User.current_user = @current_user
+    end
+  end
+
+= Examples
+
+Auditor works very similarly to Joshua Clayton's acts_as_auditable plugin. There are two audit calls in the example below. The first declares that create and update actions should be audited for the EditablePage model and the string returned by the passed block should be included as a custom message. The second audit call simply changes the custom message when auditing destroy (aka delete) actions.
+
+  class EditablePage < ActiveRecord::Base
+    include Auditor::ModelAudit
+    
+    has_many :tags
+    
+    audit(:create, :update) { |model, user| "Editable page modified by #{user.display_name}" }
+    audit(:destroy) { |model, user| "#{user.display_name} deleted editable page #{model.id}" }
+  end
+
+All audit data is stored in a table named Audits, which is automatically created for you when you run the migration included with the plugin. However, there's a lot more recorded than just the custom message, including:
+
+* auditable_id - the primary key of the table belonging to the audited model object
+* auditable_type - the class type of the audited model object
+* auditable_version - the version number of the audited model object (if versioning is tracked)
+* user_id - the primary key of the table belonging to the user being audited
+* user_type - the class type of the model object representing users in your application
+* action - a string indicating the action that was audited (create, update, destroy, or find)
+* message - the custom message returned by any block passed to the audit call
+* edits - a YAML string containing the before and after state of any model attributes that changed
+* created_at - the date and time the audit record was recorded
+
+The edits column automatically serializes the before and after state of any model attributes that change during the action. If there are only a few attributes you want to audit or a couple that you want to prevent from being audited, you can specify that in the audit call. For example
+
+  # Prevent SSN and passwords from being saved in the audit table
+  audit(:create, :destroy, :except => [:ssn, :password])
+  
+  # Only audit edits to the title column when destroying/deleting
+  audit(:destroy, :only => :title)
+
+Copyright (c) 2010 Near Infinity Corporation, released under the MIT license
