@@ -66,4 +66,4 @@ The edits column automatically serializes the before and after state of any mode
   # Only audit edits to the title column when destroying/deleting
   audit(:destroy, :only => :title)
 
-Copyright (c) 2010 Near Infinity Corporation, released under the MIT license
+Copyright (c) 2011 Near Infinity Corporation, released under the MIT license
