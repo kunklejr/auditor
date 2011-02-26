@@ -1,16 +1,15 @@
 module Auditor
   module User
+
     def current_user
-      Thread.current[@@current_user_symbol]
+      Thread.current[:auditor_user]
     end
 
     def current_user=(user)
-      Thread.current[@@current_user_symbol] = user
+      Thread.current[:auditor_user] = user
     end
-    
+
     module_function :current_user, :current_user=
 
-    private
-    @@current_user_symbol = :auditor_current_user
   end
 end

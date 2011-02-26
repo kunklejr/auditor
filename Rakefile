@@ -3,6 +3,9 @@ $:.unshift File.expand_path("../lib", __FILE__)
 require 'rake'
 require 'rake/rdoctask'
 require 'rspec/core/rake_task'
+require 'bundler'
+
+Bundler::GemHelper.install_tasks
 
 desc 'Default: run specs'
 task :default => :spec
@@ -28,10 +31,3 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-task :build do
-  system "gem build auditor.gemspec"
-end
- 
-task :release => :build do
-  system "gem push auditor-#{Auditor::VERSION}"
-end

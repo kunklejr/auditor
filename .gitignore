@@ -1,3 +1,6 @@
 coverage
 rdoc
-auditor-*.gem
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
