@@ -1,6 +1,6 @@
 require 'auditor/audit'
 require 'auditor/status'
-require 'auditor/config_parser'
+require 'auditor/config'
 require 'auditor/recorder'
 require 'auditor/user'
 
@@ -13,14 +13,12 @@ module Auditor
 
   module ClassMethods
     def audit(*args, &blk)
-      actions, options = ConfigParser.extract_config(args)
-
-      actions.each do |action|
-        recorder = Recorder.new(options, &blk)
-        send "before_#{action}", recorder unless action.to_sym == :find
-        send "after_#{action}", recorder
+      config = Config.new(args)
+      config.actions.each do |action|
+        send "after_#{action}", Recorder.new(config.options, &blk)
       end
     end
   end
 end
 
+ActiveRecord::Base.send :include, Auditor

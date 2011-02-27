@@ -9,30 +9,26 @@ module Auditor
       @blk = blk
     end
 
-    def after_find(model)
-      @audit = Audit.new
+    [:create, :find, :update, :destroy].each do |action|
+      define_method("after_#{action}") do |model|
+        audit(model, action)
+      end
     end
 
   private
 
-    def user
-      Auditor::User.current_user
-    end
-
-    def audit_before(model)
-      @audit = Audit.new(:audited_changes => prepare_changes(model.changes))
-    end
-
-    def audit_after(model, action)
+    def audit(model, action)
       return true if auditor_disabled?
+      user = Auditor::User.current_user
 
-      @audit.attributes = {
+      @audit = Audit.new({
         :auditable_id => model.id,
         :auditable_type => model.class.to_s,
+        :audited_changes => prepare_changes(model.changes),
         :user_id => user.id,
         :user_type => user.class.to_s,
         :action => action.to_s
-      }
+      })
 
       @audit.auditable_version = model.version if model.respond_to?(:version)
       @audit.comment = @blk.call(model, user) if @blk
@@ -48,20 +44,5 @@ module Auditor
       chg.empty? ? nil : chg
     end
 
-  public
-
-    def self.after_callback(action)
-      define_method("after_#{action}") do |model|
-        audit_after(model, action)
-      end
-    end
-
-    alias :before_create :audit_before
-    alias :before_update :audit_before
-    alias :before_destroy :audit_before
-
-    after_callback(:create)
-    after_callback(:update)
-    after_callback(:destroy)
   end
 end

@@ -1,23 +1,23 @@
 module Auditor
   module Status
 
-    def auditor_disabled?
+    def auditing_disabled?
       Thread.current[:auditor_disabled] == true
     end
 
-    def auditor_enabled?
+    def auditing_enabled?
       Thread.current[:auditor_disabled] == false
     end
 
-    def disable_auditor
+    def disable_auditing
       Thread.current[:auditor_disabled] = true
     end
 
-    def enable_auditor
+    def enable_auditing
       Thread.current[:auditor_disabled] = false
     end
 
-    def without_auditor
+    def without_auditing
       previously_disabled = auditor_disabled?
 
       begin
@@ -30,7 +30,7 @@ module Auditor
       result
     end
 
-    def with_auditor
+    def with_auditing
       previously_disabled = auditor_disabled?
 
       begin
