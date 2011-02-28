@@ -1,6 +1,10 @@
 require 'auditor/audit'
 require 'auditor/auditable'
 
+module Auditor
+  class Error < StandardError; end
+end
+
 ActiveRecord::Base.send :include, Auditor::Auditable
 
 if defined?(ActionController) and defined?(ActionController::Base)

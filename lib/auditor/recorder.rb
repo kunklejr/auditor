@@ -24,12 +24,11 @@ module Auditor
       audit = Audit.new
       audit.auditable = model
       audit.user = user
-      audit.audited_changes = prepare_changes(model.changes)
+      audit.audited_changes = prepare_changes(model.changes) if changes_available?(action)
       audit.action = action.to_s
       audit.comment = @blk.call(model, user) if @blk
 
-      # TODO: Make the bang a configurable option
-      audit.save!
+      @options[:fail_on_error] ? audit.save! : audit.save
     end
 
     def prepare_changes(changes)
@@ -37,6 +36,10 @@ module Auditor
       chg = chg.delete_if { |key, value| @options[:except].include?(key) } unless @options[:except].empty?
       chg = chg.delete_if { |key, value| !@options[:only].include?(key) } unless @options[:only].empty?
       chg.empty? ? nil : chg
+    end
+
+    def changes_available?(action)
+      [:create, :update].include?(action)
     end
 
   end
