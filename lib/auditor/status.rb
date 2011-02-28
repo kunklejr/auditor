@@ -43,5 +43,18 @@ module Auditor
       result
     end
 
+    def audit_as(user)
+      previous_user = Audit::User.current_user
+
+      begin
+        Audit::User.current_user = user
+        result = yield if block_given?
+      ensure
+        Audit::User.current_user = previous_user
+      end
+
+      result
+    end
+
   end
 end

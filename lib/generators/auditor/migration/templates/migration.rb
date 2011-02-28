@@ -7,7 +7,6 @@ class CreateAuditsTable < ActiveRecord::Migration
       t.column :user_type, :string, :null => false
       t.column :action, :string, :null => false
       t.column :audited_changes, :text
-      t.column :version, :integer, :default => 0
       t.column :comment, :text
       t.column :created_at, :datetime, :null => false
     end

@@ -1,24 +1,17 @@
 require 'auditor/audit'
-require 'auditor/status'
-require 'auditor/config'
-require 'auditor/recorder'
-require 'auditor/user'
+require 'auditor/auditable'
 
-module Auditor
-  include Status
+ActiveRecord::Base.send :include, Auditor::Auditable
 
-  def self.included(base)
-    base.extend(ClassMethods)
-  end
+if defined?(ActionController) and defined?(ActionController::Base)
 
-  module ClassMethods
-    def audit(*args, &blk)
-      config = Config.new(args)
-      config.actions.each do |action|
-        send "after_#{action}", Recorder.new(config.options, &blk)
-      end
+  require 'auditor/user'
+
+  ActionController::Base.class_eval do
+    before_filter do
+      Auditor::User.current_user = self.current_user if self.respond_to?(:current_user)
     end
   end
+
 end
 
-ActiveRecord::Base.send :include, Auditor

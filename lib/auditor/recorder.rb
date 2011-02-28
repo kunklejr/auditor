@@ -18,26 +18,21 @@ module Auditor
   private
 
     def audit(model, action)
-      return true if auditor_disabled?
+      return true if auditing_disabled?
       user = Auditor::User.current_user
 
-      @audit = Audit.new({
-        :auditable_id => model.id,
-        :auditable_type => model.class.to_s,
-        :audited_changes => prepare_changes(model.changes),
-        :user_id => user.id,
-        :user_type => user.class.to_s,
-        :action => action.to_s
-      })
-
-      @audit.auditable_version = model.version if model.respond_to?(:version)
-      @audit.comment = @blk.call(model, user) if @blk
+      audit = Audit.new
+      audit.auditable = model
+      audit.user = user
+      audit.audited_changes = prepare_changes(model.changes)
+      audit.action = action.to_s
+      audit.comment = @blk.call(model, user) if @blk
 
       # TODO: Make the bang a configurable option
-      @audit.save!
+      audit.save!
     end
 
-    def prepare_changes(edits)
+    def prepare_changes(changes)
       chg = changes.dup
       chg = chg.delete_if { |key, value| @options[:except].include?(key) } unless @options[:except].empty?
       chg = chg.delete_if { |key, value| !@options[:only].include?(key) } unless @options[:only].empty?
