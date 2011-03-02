@@ -18,26 +18,26 @@ module Auditor
     end
 
     def without_auditing
-      previously_disabled = auditor_disabled?
+      previously_disabled = auditing_disabled?
 
       begin
-        disable_auditor
+        disable_auditing
         result = yield if block_given?
       ensure
-        enable_auditor unless previously_disabled
+        enable_auditing unless previously_disabled
       end
 
       result
     end
 
     def with_auditing
-      previously_disabled = auditor_disabled?
+      previously_disabled = auditing_disabled?
 
       begin
-        enable_auditor
+        enable_auditing
         result = yield if block_given?
       ensure
-        disable_auditor if previously_disabled
+        disable_auditing if previously_disabled
       end
 
       result

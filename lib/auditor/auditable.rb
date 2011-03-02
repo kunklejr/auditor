@@ -17,7 +17,7 @@ module Auditor
           has_many :audits, :as => :auditable
         end
 
-        config = Auditor::Config.new(args)
+        config = Auditor::Config.new(*args)
         config.actions.each do |action|
           send "after_#{action}", Auditor::Recorder.new(config.options, &blk)
         end

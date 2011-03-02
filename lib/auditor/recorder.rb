@@ -18,14 +18,14 @@ module Auditor
   private
 
     def audit(model, action)
-      return true if auditing_disabled?
+      return nil if auditing_disabled?
       user = Auditor::User.current_user
 
       audit = Audit.new
       audit.auditable = model
       audit.user = user
       audit.audited_changes = prepare_changes(model.changes) if changes_available?(action)
-      audit.action = action.to_s
+      audit.action = action
       audit.comment = @blk.call(model, user) if @blk
 
       @options[:fail_on_error] ? audit.save! : audit.save

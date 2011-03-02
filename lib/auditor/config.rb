@@ -11,7 +11,7 @@ module Auditor
       @modifying_actions ||= [:create, :update, :destroy]
     end
 
-    def initialize(args)
+    def initialize(*args)
       @options = (args.pop if args.last.kind_of?(Hash)) || {}
       normalize_options(@options)
 
@@ -25,13 +25,13 @@ module Auditor
       options.each_pair { |k, v| options[k.to_sym] = options.delete(k) unless k.kind_of? Symbol }
       options[:only] ||= []
       options[:except] ||= []
-      options[:only] = options[:only].map(&:to_s)
-      options[:except] = options[:except].map(&:to_s)
+      options[:only] = Array(options[:only]).map(&:to_s)
+      options[:except] = Array(options[:except]).map(&:to_s)
     end
 
     def validate_actions(actions)
       raise Auditor::Error.new "at least one action in #{Config.valid_actions.inspect} must be specified" if actions.empty?
-      raise Auditor::Error.new "#{Config.valid_actions.inspect} are the only valid actions" unless actions.all? { |a| Config.valid_actions.include?(a) }
+      raise Auditor::Error.new "#{Config.valid_actions.inspect} are the only valid actions" unless actions.all? { |a| Config.valid_actions.include?(a.to_sym) }
     end
 
   end

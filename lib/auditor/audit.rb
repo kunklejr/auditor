@@ -5,23 +5,20 @@ class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
   belongs_to :user, :polymorphic => true
 
-  validates_presence_of :auditable_id, :auditable_type, :user_id, :user_type, :action
-  validates_inclusion_of :action, :in => Auditor::Config.valid_actions
-
   before_create :set_version_number
 
   serialize :audited_changes
 
   default_scope order(:version, :created_at)
   scope :modifying, lambda { where('action in (?)', Auditor::Config.modifying_actions) }
-  scope :predecessors, lambda { |audit|
+  scope :trail, lambda { |audit|
     where('auditable_id = ? and auditable_type = ? and version <= ?',
     audit.auditable_id, audit.auditable_type, audit.version) 
   }
 
   def attribute_snapshot
     attributes = {}.with_indifferent_access
-    self.class.modifying.predecessors(self).each do |predecessor|
+    self.class.modifying.trail(self).each do |predecessor|
       attributes.merge!(predecessor.new_attributes)
     end
     attributes
