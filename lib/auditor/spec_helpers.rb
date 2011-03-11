@@ -5,11 +5,11 @@ module Auditor
     def self.included(base)
       base.class_eval do
         before(:each) do
-          disable_auditor
+          disable_auditing
         end
 
         after(:each) do
-          enable_auditor
+          enable_auditing
         end
       end
     end

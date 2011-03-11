@@ -6,6 +6,7 @@ class Audit < ActiveRecord::Base
   belongs_to :user, :polymorphic => true
 
   before_create :set_version_number
+  before_create :set_user
 
   serialize :audited_changes
 
@@ -43,6 +44,10 @@ private
     ).maximum(:version) || 0
 
     self.version = Auditor::Config.modifying_actions.include?(self.action.to_sym) ? max + 1 : max
+  end
+
+  def set_user
+    self.user = Auditor::User.current_user if self.user_id.nil?
   end
 
 end
