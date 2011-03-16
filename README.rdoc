@@ -37,33 +37,80 @@ Auditor needs to know who the current user is, but with no standard for doing so
 
 Auditor works very similarly to Joshua Clayton's acts_as_auditable plugin. There are two audit calls in the example below. The first declares that create and update actions should be audited for the EditablePage model and the string returned by the passed block should be included as a custom message. The second audit call simply changes the custom message when auditing destroy (aka delete) actions.
 
-  class EditablePage < ActiveRecord::Base
-    include Auditor::ModelAudit
-    
-    has_many :tags
-    
-    audit(:create, :update) { |model, user| "Editable page modified by #{user.display_name}" }
-    audit(:destroy) { |model, user| "#{user.display_name} deleted editable page #{model.id}" }
+  class Page < ActiveRecord::Base
+    audit(:create, :update) { |model, user| "Page modified by #{user.display_name}" }
+    audit(:destroy) { |model, user| "#{user.display_name} deleted page #{model.id}" }
   end
 
 All audit data is stored in a table named Audits, which is automatically created for you when you run the migration included with the plugin. However, there's a lot more recorded than just the custom message, including:
 
 * auditable_id - the primary key of the table belonging to the audited model object
 * auditable_type - the class type of the audited model object
-* auditable_version - the version number of the audited model object (if versioning is tracked)
 * user_id - the primary key of the table belonging to the user being audited
 * user_type - the class type of the model object representing users in your application
 * action - a string indicating the action that was audited (create, update, destroy, or find)
-* message - the custom message returned by any block passed to the audit call
-* edits - a YAML string containing the before and after state of any model attributes that changed
+* audited_changes - a YAML string containing the before and after state of any model attributes that changed
+* comment - the custom message returned by any block passed to the audit call
+* version - an auditor-internal revision number for the audited model
 * created_at - the date and time the audit record was recorded
 
-The edits column automatically serializes the before and after state of any model attributes that change during the action. If there are only a few attributes you want to audit or a couple that you want to prevent from being audited, you can specify that in the audit call. For example
+The audited_changes column automatically serializes the changes of any model attributes modified during the action. If there are only a few attributes you want to audit or a couple that you want to prevent from being audited, you can specify that in the audit call. For example
 
   # Prevent SSN and passwords from being saved in the audit table
   audit(:create, :destroy, :except => [:ssn, :password])
   
   # Only audit edits to the title column when destroying/deleting
   audit(:destroy, :only => :title)
+
+= Make Auditing Important
+
+There's an alternate form of specifying your audit requirements that will cause the create, find, update, or destroy to fail if for some reason the audit record cannot be saved to the database. Instead of calling audit, call audit! instead.
+
+  class Page < ActiveRecord::Base
+    audit!(:create, :update) { |model, user| "Page modified by #{user.display_name}" }
+    audit!(:destroy) { |model, user| "#{user.display_name} deleted page #{model.id}" }
+  end
+
+= Auditable Versioning
+
+Since auditor will keep a "diff" of all the changes applied to a model object, you can retrieve the state of any audited model object's attributes at any point in time. For this to work, you have to specify auditing for all actions that modify the table, which is create, update, and destroy. Assuming those attributes have been declared with a call to audit or audit!, the following shows you how to use the revisions.
+
+  p = Page.create(:title => "Revision 1")
+  p.audits.last.attribute_snapshot
+  > {:title => "Revision 1"}
+  time = Time.now
+  p.author = "Jeff"
+  p.save
+  p.audits.last.attribute_snapshot
+  > {:title => "Revision 1", :author => "Jeff"}
+  p.attributes_at(time)
+  > {:title => "Revision 1"}
+
+= Integration
+There may be some instances where you need to perform an action on your model object without Auditor recording the action. In those cases you can include the Auditor::Status module for help.
+
+  class PagesController < ApplicationController
+    include Auditor::Status
+
+    def update
+      page = Page.find(params[:id])
+        without_auditing { page.update_attributes(params[:page]) } # Auditor is disabled for the entire block
+      end
+    end
+  end
+
+You can also force Auditor to audit any actions within a block as a specified user.
+
+  class PagesController < ApplicationController
+    include Auditor::Status
+
+    def update
+      page = Page.find(params[:id])
+        # Auditor will attribute update to 'another user'
+        audit_as(another_user) { page.update_attributes(params[:page]) }
+      end
+    end
+  end
+
 
 Copyright (c) 2011 Near Infinity Corporation, released under the MIT license
