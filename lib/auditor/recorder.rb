@@ -33,8 +33,8 @@ module Auditor
 
     def prepare_changes(changes)
       chg = changes.dup
-      chg = chg.delete_if { |key, value| @options[:except].include?(key) } unless @options[:except].empty?
-      chg = chg.delete_if { |key, value| !@options[:only].include?(key) } unless @options[:only].empty?
+      chg = chg.delete_if { |key, value| @options[:except].include?(key) } unless @options[:except].blank?
+      chg = chg.delete_if { |key, value| !@options[:only].include?(key) } unless @options[:only].blank?
       chg.empty? ? nil : chg
     end
 
