@@ -22,7 +22,8 @@ module Auditor
       user = Auditor::User.current_user
 
       audit = Audit.new
-      audit.auditable = model
+      audit.auditable_id = model.id
+      audit.auditable_type = model.class.name
       audit.audited_changes = prepare_changes(model.changes) if changes_available?(action)
       audit.action = action
       audit.comment = @blk.call(model, user) if @blk
