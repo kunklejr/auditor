@@ -7,10 +7,6 @@ module Auditor
       @valid_actions ||= [:create, :find, :update, :destroy]
     end
 
-    def self.modifying_actions
-      @modifying_actions ||= [:create, :update, :destroy]
-    end
-
     def initialize(*args)
       @options = (args.pop if args.last.kind_of?(Hash)) || {}
       normalize_options(@options)

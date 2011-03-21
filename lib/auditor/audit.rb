@@ -11,7 +11,7 @@ class Audit < ActiveRecord::Base
   serialize :audited_changes
 
   default_scope order(:version, :created_at)
-  scope :modifying, lambda { where('action in (?)', Auditor::Config.modifying_actions) }
+  scope :modifying, lambda { where('audited_changes is not null') }
   scope :trail, lambda { |audit|
     where('auditable_id = ? and auditable_type = ? and version <= ?',
     audit.auditable_id, audit.auditable_type, audit.version) 
@@ -43,7 +43,7 @@ private
       :auditable_type => auditable_type
     ).maximum(:version) || 0
 
-    self.version = Auditor::Config.modifying_actions.include?(self.action.to_sym) ? max + 1 : max
+    self.version = self.audited_changes == nil ? max : max + 1
   end
 
   def set_user

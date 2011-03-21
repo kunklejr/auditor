@@ -8,7 +8,7 @@ describe Audit do
   end
 
   it 'should set the version number on save' do
-    audit = Audit.create(:auditable => @auditable, :user => @user, :action => :create)
+    audit = Audit.create(:auditable => @auditable, :audited_changes => { :name => [nil, 'new']}, :user => @user, :action => :create)
     audit.version.should == 1
   end
 
@@ -35,8 +35,8 @@ describe Audit do
 
   describe 'modifying scope' do
     it 'should return all audit records that were a result of modifying the audited object attributes' do
-      audit1 = Audit.create(:auditable => @auditable, :user => @user, :action => :create)
-      audit2 = Audit.create(:auditable => @auditable, :user => @user, :action => :update, :audited_changes => {'name' => [nil, 'n1'], 'value' => [nil, 'v1']})
+      audit1 = Audit.create(:auditable => @auditable, :user => @user, :action => :create, :audited_changes  => {'name' => [nil, 'n0']})
+      audit2 = Audit.create(:auditable => @auditable, :user => @user, :action => :update, :audited_changes => {'name' => ['n0', 'n1'], 'value' => [nil, 'v1']})
       audit3 = Audit.create(:auditable => @auditable, :user => @user, :action => :find)
       audit4 = Audit.create(:auditable => @auditable, :user => @user, :action => :update, :audited_changes => {'value' => [nil, 'v2']})
 
