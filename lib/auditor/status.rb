@@ -44,13 +44,13 @@ module Auditor
     end
 
     def audit_as(user)
-      previous_user = Audit::User.current_user
+      previous_user = Auditor::User.current_user
 
       begin
-        Audit::User.current_user = user
+        Auditor::User.current_user = user
         result = yield if block_given?
       ensure
-        Audit::User.current_user = previous_user
+        Auditor::User.current_user = previous_user
       end
 
       result
