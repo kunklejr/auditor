@@ -1,3 +1,5 @@
+require 'auditor/user'
+
 module Auditor
   module Status
 

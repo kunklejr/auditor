@@ -35,6 +35,8 @@ describe Auditor::Recorder do
     audit.action.should == action.to_s
     audit.auditable_id.should == model.id
     audit.auditable_type.should == model.class.to_s
+    audit.owner_id.should == model.id
+    audit.owner_type.should == model.class.to_s
     audit.user_id.should == @user.id
     audit.user_type.should == @user.class.to_s
     audit.comment.should == 'comment'
@@ -42,6 +44,7 @@ describe Auditor::Recorder do
 
     audit.user.should == @user
     audit.auditable.should == model
+    audit.owner.should == model
   end
 
   it 'should set comment details to nil if they are not given' do
@@ -81,6 +84,21 @@ describe Auditor::Recorder do
     audit.audited_changes.should == {'name' => [nil, 'changed'] }
   end
 
-  class Model < ActiveRecord::Base; end
-  class User < ActiveRecord::Base; end
+  it 'should associate audit records with an owner' do
+    model = Model.create
+    config = Auditor::Config.new(:create)
+    recorder = Auditor::Recorder.new(config.options)
+    recorder.after_create(model)
+    audit = Audit.last
+    audit.owner.should == model
+
+    owner = User.create
+    model.user = owner
+    config = Auditor::Config.new(:create, :on => :user)
+    recorder = Auditor::Recorder.new(config.options)
+    recorder.after_create(model)
+    audit = Audit.last
+    audit.owner.should == owner
+  end
+
 end

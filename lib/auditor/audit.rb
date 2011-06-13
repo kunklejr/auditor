@@ -3,6 +3,7 @@ require 'auditor/config'
 
 class Audit < ActiveRecord::Base
   belongs_to :auditable, :polymorphic => true
+  belongs_to :owner, :polymorphic => true
   belongs_to :user, :polymorphic => true
 
   before_create :set_version_number

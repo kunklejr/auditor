@@ -28,6 +28,10 @@ module Auditor
       audit.action = action
       audit.comment = @blk.call(model, user) if @blk
 
+      owner = @options[:on] ? model.send(@options[:on].to_sym) : model
+      audit.owner_id = owner.id
+      audit.owner_type = owner.class.name
+
       @options[:fail_on_error] ? audit.save! : audit.save
     end
 

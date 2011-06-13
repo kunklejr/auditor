@@ -7,7 +7,12 @@ describe Auditor::Auditable do
 
   before(:each) do
     @user = User.create
+    @original_model = Model
     Auditor::User.current_user = @user
+  end
+
+  after(:each) do
+    reset_model
   end
 
   it 'should audit find' do
@@ -105,7 +110,9 @@ describe Auditor::Auditable do
     Object.send :const_set, 'Model', clazz
   end
 
-  class ::User < ActiveRecord::Base; end
-  class ::Model < ActiveRecord::Base; end
+  def reset_model
+    Object.send :remove_const, 'Model'
+    Object.send :const_set, 'Model', @original_model
+  end
 
 end

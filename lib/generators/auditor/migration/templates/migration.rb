@@ -3,6 +3,8 @@ class CreateAuditsTable < ActiveRecord::Migration
     create_table :audits, :force => true do |t|
       t.column :auditable_id, :integer, :null => false
       t.column :auditable_type, :string, :null => false
+      t.column :owner_id, :integer, :null => false
+      t.column :owner_type, :string, :null => false
       t.column :user_id, :integer, :null => false
       t.column :user_type, :string, :null => false
       t.column :action, :string, :null => false

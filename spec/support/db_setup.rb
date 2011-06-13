@@ -1,6 +1,7 @@
 require 'active_support/core_ext'
 require 'active_record'
 require 'generators/auditor/migration/templates/migration'
+require 'fileutils'
 
 tmpdir = File.join(File.dirname(__FILE__), '..', '..', 'tmp')
 FileUtils.mkdir(tmpdir) unless File.exist?(tmpdir)
@@ -36,6 +37,7 @@ class CreateModel < ActiveRecord::Migration
     create_table :models, :force => true do |t|
       t.column :name, :string
       t.column :value, :string
+      t.column :user_id, :integer
     end
   end
 
