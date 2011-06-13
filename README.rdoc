@@ -19,6 +19,13 @@ Generate the migration and create the audits table
   rails generate auditor:migration
   rake db:migrate
 
+= Upgrading
+
+You will need to run the upgrade migration if coming from a version earlier than 2.1.0
+
+  rails generate auditor:upgrade
+  rake db:migrate
+
 = Setup
 
 Auditor needs to know who the current user is, but with no standard for doing so you'll have to do a little work to set things up. You simply need to set your current user model object as the Auditor current user before any CRUD operations are performed. For example, in a Rails application you could add the following to your application_controller.rb
@@ -46,6 +53,8 @@ All audit data is stored in a table named Audits, which is automatically created
 
 * auditable_id - the primary key of the table belonging to the audited model object
 * auditable_type - the class type of the audited model object
+* owner_id - the primary key of the of the model that owns this audit record
+* owner_type - the class type of the owner model object
 * user_id - the primary key of the table belonging to the user being audited
 * user_type - the class type of the model object representing users in your application
 * action - a string indicating the action that was audited (create, update, destroy, or find)
@@ -61,6 +70,9 @@ The audited_changes column automatically serializes the changes of any model att
   
   # Only audit edits to the title column when destroying/deleting
   audit(:destroy, :only => :title)
+
+  # Associate the audit records with a related model, which becomes the owner
+  audit(:update, :on => :book)
 
 = Make Auditing Important
 
