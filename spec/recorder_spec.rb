@@ -101,4 +101,15 @@ describe Auditor::Recorder do
     audit.owner.should == owner
   end
 
+  it 'should pass the model, user, and action to any supplied block' do
+    model = Model.create
+    config = Auditor::Config.new(:create)
+    recorder = Auditor::Recorder.new(config.options) do |model, user, action|
+      model.should == model
+      user.should == @user
+      action.should == :create
+    end
+    recorder.after_create(model)
+  end
+
 end
