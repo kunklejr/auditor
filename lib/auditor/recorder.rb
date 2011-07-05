@@ -24,8 +24,11 @@ module Auditor
       audit = Audit.new
       audit.auditable_id = model.id
       audit.auditable_type = model.class.name
-      audit.audited_changes = prepare_changes(model.changes) if changes_available?(action)
+      audit.audited_changes = prepare_changes(model.changes) if model.changed?
       audit.action = action
+
+      return if noop?(audit)
+
       audit.comment = @blk.call(model, user, action) if @blk
 
       without_auditing do
@@ -44,9 +47,8 @@ module Auditor
       chg.empty? ? nil : chg
     end
 
-    def changes_available?(action)
-      [:create, :update].include?(action)
+    def noop?(audit)
+      audit.action == :update && !audit.audited_changes.present?
     end
-
   end
 end

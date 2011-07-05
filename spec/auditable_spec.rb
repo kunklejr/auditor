@@ -97,6 +97,15 @@ describe Auditor::Auditable do
     m.attributes_at(ts4).should == {'name' => '2', 'id' => m.id}
   end
 
+  it 'should not save an update record that does not have any audited changes' do
+    redefine_model { audit!(:update, :except => :name) }
+
+    lambda {
+      m = Model.create(:name => 'new')
+      m.update_attributes({:name => 'newer'})
+    }.should_not change(Audit, :count)
+  end
+
   def verify_audit(audit, model, changes=nil)
     audit.should_not be_nil
     audit.auditable.should == model unless audit.action == 'destroy'
