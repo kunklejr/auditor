@@ -45,8 +45,8 @@ Auditor needs to know who the current user is, but with no standard for doing so
 Auditor works very similarly to Joshua Clayton's acts_as_auditable plugin. There are two audit calls in the example below. The first declares that create and update actions should be audited for the EditablePage model and the string returned by the passed block should be included as a custom message. The second audit call simply changes the custom message when auditing destroy (aka delete) actions.
 
   class Page < ActiveRecord::Base
-    audit(:create, :update) { |model, user| "Page modified by #{user.display_name}" }
-    audit(:destroy) { |model, user| "#{user.display_name} deleted page #{model.id}" }
+    audit(:create, :update) { |model, user, action| "Page modified by #{user.display_name}" }
+    audit(:destroy) { |model, user, action| "#{user.display_name} deleted page #{model.id}" }
   end
 
 All audit data is stored in a table named Audits, which is automatically created for you when you run the migration included with the plugin. However, there's a lot more recorded than just the custom message, including:
@@ -79,8 +79,8 @@ The audited_changes column automatically serializes the changes of any model att
 There's an alternate form of specifying your audit requirements that will cause the create, find, update, or destroy to fail if for some reason the audit record cannot be saved to the database. Instead of calling audit, call audit! instead.
 
   class Page < ActiveRecord::Base
-    audit!(:create, :update) { |model, user| "Page modified by #{user.display_name}" }
-    audit!(:destroy) { |model, user| "#{user.display_name} deleted page #{model.id}" }
+    audit!(:create, :update) { |model, user, action| "Page modified by #{user.display_name}" }
+    audit!(:destroy) { |model, user, action| "#{user.display_name} deleted page #{model.id}" }
   end
 
 = Auditable Versioning
@@ -124,5 +124,8 @@ You can also force Auditor to audit any actions within a block as a specified us
     end
   end
 
+= License
 
-Copyright (c) 2011 Near Infinity Corporation, released under the MIT license
+Auditor is released under the MIT license.
+
+Copyright (c) 2011 Near Infinity. http://www.nearinfinity.com
