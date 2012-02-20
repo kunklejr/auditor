@@ -12,10 +12,16 @@ class Audit < ActiveRecord::Base
   serialize :audited_changes
 
   default_scope order(:version, :created_at)
-  scope :modifying, lambda { where('audited_changes is not null') }
+  scope :modifying, lambda {
+    where( [
+      'audited_changes is not ? and audited_changes is not ?',
+      nil,        # ActiveRecord 3.0
+      nil.to_yaml # ActiveRecord 3.1
+    ] )
+  }
   scope :trail, lambda { |audit|
     where('auditable_id = ? and auditable_type = ? and version <= ?',
-    audit.auditable_id, audit.auditable_type, audit.version) 
+    audit.auditable_id, audit.auditable_type, audit.version)
   }
 
   def attribute_snapshot
