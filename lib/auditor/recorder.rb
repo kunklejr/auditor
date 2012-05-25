@@ -32,7 +32,7 @@ module Auditor
       audit.comment = @blk.call(model, user, action) if @blk
 
       without_auditing do
-        owner = @options[:on] ? model.send(@options[:on].to_sym) : model
+        owner = @options[:on] ? Array(@options[:on]).inject(model) { |owner, parent| owner.send(parent.to_sym) } : model
         audit.owner_id = owner.id
         audit.owner_type = owner.class.name
       end
