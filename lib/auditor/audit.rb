@@ -14,7 +14,7 @@ class Audit < ActiveRecord::Base
   default_scope order(:version, :created_at)
   scope :modifying, lambda {
     where( [
-      'audited_changes is not ? and audited_changes is not ?',
+      'audited_changes is not ? and audited_changes != ?',
       nil,        # ActiveRecord 3.0
       nil.to_yaml # ActiveRecord 3.1
     ] )
