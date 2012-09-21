@@ -74,6 +74,10 @@ The audited_changes column automatically serializes the changes of any model att
   # Associate the audit records with a related model, which becomes the owner
   audit(:update, :on => :book)
 
+  # Associate the audit records with a related model, multiple levels up.
+  # Here, we're auditing a great-grandchild where :parent will be the owner.  Order is important. 
+  audit(:update, :on => [:grandchild, :child, :parent])
+
 = Make Auditing Important
 
 There's an alternate form of specifying your audit requirements that will cause the create, find, update, or destroy to fail if for some reason the audit record cannot be saved to the database. Instead of calling audit, call audit! instead.
