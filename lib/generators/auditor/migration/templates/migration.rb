@@ -14,7 +14,7 @@ class CreateAuditsTable < ActiveRecord::Migration
       t.column :created_at, :datetime, :null => false
     end
 
-    add_index :audits, [:auditable_id, :auditable_type], :name => 'auditable_index'
+    add_index :audits, [:auditable_id, :auditable_type, :version], :name => 'auditable_index'
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
     add_index :audits, :created_at
   end
