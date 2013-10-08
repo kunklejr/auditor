@@ -4,19 +4,19 @@ module Auditor
   module Status
 
     def auditing_disabled?
-      Thread.current[:auditor_disabled] == true
+      RequestStore.store[:auditor_disabled] == true
     end
 
     def auditing_enabled?
-      Thread.current[:auditor_disabled] == false
+      RequestStore.store[:auditor_disabled] == false
     end
 
     def disable_auditing
-      Thread.current[:auditor_disabled] = true
+      RequestStore.store[:auditor_disabled] = true
     end
 
     def enable_auditing
-      Thread.current[:auditor_disabled] = false
+      RequestStore.store[:auditor_disabled] = false
     end
 
     def without_auditing

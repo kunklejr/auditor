@@ -1,5 +1,6 @@
 require 'rspec'
 require 'auditor'
+require 'request_store'
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
