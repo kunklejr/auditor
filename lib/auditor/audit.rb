@@ -1,4 +1,5 @@
 require 'active_record'
+require 'request_store'
 require 'auditor/config'
 
 class Audit < ActiveRecord::Base
